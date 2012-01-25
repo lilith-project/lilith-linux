@@ -217,6 +217,11 @@ config MACH_SAM9_L9260
 	  Select this if you are using Olimex's SAM9-L9260 board based on the Atmel AT91SAM9260.
 	  <http://www.olimex.com/dev/sam9-L9260.html>
 
+config MACH_LILITH
+	bool "Lilith board"
+	help
+	  Select this if you are using Lilith board based on the Atmel AT91SAM9260.
+
 config MACH_AFEB9260
 	bool "Custom afeb9260 board v1"
 	help
