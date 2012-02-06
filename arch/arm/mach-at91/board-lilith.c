@@ -27,6 +27,8 @@
 #include <linux/mm.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
+#include <linux/uio_driver.h>
+
 #include <linux/spi/spi.h>
 
 #include <mach/hardware.h>
@@ -40,6 +42,7 @@
 
 #include <mach/board.h>
 #include <mach/at91sam9_smc.h>
+#include <mach/at91sam9260.h>
 
 #include "sam9_smc.h"
 #include "generic.h"
@@ -87,29 +90,6 @@ static struct at91_udc_data __initdata ek_udc_data = {
 
 
 /*
- * SPI devices.
- */
-static struct spi_board_info ek_spi_devices[] = {
-#if !defined(CONFIG_MMC_AT91)
-	{	/* DataFlash chip */
-		.modalias	= "mtd_dataflash",
-		.chip_select	= 1,
-		.max_speed_hz	= 15 * 1000 * 1000,
-		.bus_num	= 0,
-	},
-#if defined(CONFIG_MTD_AT91_DATAFLASH_CARD)
-	{	/* DataFlash card */
-		.modalias	= "mtd_dataflash",
-		.chip_select	= 0,
-		.max_speed_hz	= 15 * 1000 * 1000,
-		.bus_num	= 0,
-	},
-#endif
-#endif
-};
-
-
-/*
  * MACB Ethernet device
  */
 static struct macb_platform_data __initdata ek_macb_data = {
@@ -130,25 +110,56 @@ static struct at91_mmc_data __initdata ek_mmc_data = {
 	.vcc_pin	= -EINVAL,
 };
 
+/*
+ * Regs via UIO
+ */
+static struct uio_info tc_platform_data = {
+        .name = "TC",
+        .version = "0",
+};
+
+static struct resource tc_resource[] = {
+        [0] = {
+                .name   = "TC regs",
+                .start  = AT91SAM9260_BASE_TC0,
+                .end    = AT91SAM9260_BASE_TC0 + 0xC0,
+                .flags  = IORESOURCE_MEM,
+        },
+};
+
+static struct platform_device tc_device = {
+        .name           = "uio_pdrv_genirq",
+        .id             = 0,
+        .dev = {
+                .platform_data  = &tc_platform_data,
+        },
+        .resource       = tc_resource,
+        .num_resources  = ARRAY_SIZE(tc_resource),
+};
+
+
+
+/*
+ * Board init
+ */
 static void __init ek_board_init(void)
 {
 	/* Serial */
 	at91_add_device_serial();
+	/* MMC */
+	at91_add_device_mmc(0, &ek_mmc_data);
 	/* USB Host */
 	at91_add_device_usbh(&ek_usbh_data);
 	/* USB Device */
 	at91_add_device_udc(&ek_udc_data);
-	/* SPI */
-	at91_add_device_spi(ek_spi_devices, ARRAY_SIZE(ek_spi_devices));
 	/* Ethernet */
 	at91_add_device_eth(&ek_macb_data);
-	/* MMC */
-	at91_add_device_mmc(0, &ek_mmc_data);
-	/* I2C */
-	at91_add_device_i2c(NULL, 0);
+
+	/* UIO */
+	platform_device_register(&tc_device);
 }
 
-MACHINE_START(SAM9_L9260, "Lilith")
+MACHINE_START(LILITH, "Lilith")
 	/* Maintainer: JR */
 	.timer		= &at91sam926x_timer,
 	.map_io		= at91_map_io,
