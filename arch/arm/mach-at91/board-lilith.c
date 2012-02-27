@@ -98,7 +98,6 @@ static struct macb_platform_data __initdata ek_macb_data = {
 };
 
 
-
 /*
  * MCI (SD/MMC)
  */
@@ -113,28 +112,59 @@ static struct at91_mmc_data __initdata ek_mmc_data = {
 /*
  * Regs via UIO
  */
-static struct uio_info tc_platform_data = {
-        .name = "TC",
+static struct uio_info at91_uio_platform_data = {
+        .name = "AT91 Regs",
         .version = "0",
 };
 
-static struct resource tc_resource[] = {
+static struct resource at91_regs_resource[] = {
         [0] = {
-                .name   = "TC regs",
+                .name   = "TC 0-2 regs",
                 .start  = AT91SAM9260_BASE_TC0,
                 .end    = AT91SAM9260_BASE_TC0 + 0xC0,
                 .flags  = IORESOURCE_MEM,
         },
+
+        [1] = {
+                .name   = "TC 3-6 regs",
+                .start  = AT91SAM9260_BASE_TC3,
+                .end    = AT91SAM9260_BASE_TC3 + 0xC0,
+                .flags  = IORESOURCE_MEM,
+        },
+
+
+        [2] = {
+                .name   = "GPIO regs",
+                .start  = AT91SAM9260_BASE_PIOA,
+                .end    = AT91SAM9260_BASE_PIOA + 0x600,
+                .flags  = IORESOURCE_MEM,
+        },
+
+/*	[3] = {
+                .name   = "USART 0-2 regs",
+                .start  = AT91SAM9260_BASE_US0,
+                .end    = AT91SAM9260_BASE_US0 + 0xC000,
+                .flags  = IORESOURCE_MEM,
+        },
+
+	[4] = {
+                .name   = "USART 3-6 regs",
+                .start  = AT91SAM9260_BASE_US3,
+                .end    = AT91SAM9260_BASE_US3 + 0xC000,
+                .flags  = IORESOURCE_MEM,
+        },
+*/
 };
 
-static struct platform_device tc_device = {
+static struct platform_device at91_uio_regs = {
         .name           = "uio_pdrv_genirq",
         .id             = 0,
         .dev = {
-                .platform_data  = &tc_platform_data,
+                .platform_data  = &at91_uio_platform_data,
         },
-        .resource       = tc_resource,
-        .num_resources  = ARRAY_SIZE(tc_resource),
+
+        .resource       = at91_regs_resource,
+        .num_resources  = ARRAY_SIZE(at91_regs_resource),
 };
 
 
@@ -156,7 +186,7 @@ static void __init ek_board_init(void)
 	at91_add_device_eth(&ek_macb_data);
 
 	/* UIO */
-	platform_device_register(&tc_device);
+	platform_device_register(&at91_uio_regs);
 }
 
 MACHINE_START(LILITH, "Lilith")
