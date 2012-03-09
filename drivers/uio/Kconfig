@@ -94,15 +94,6 @@ config UIO_NETX
 	  To compile this driver as a module, choose M here; the module
 	  will be called uio_netx.
 
-config UIO_LILITH
-	tristate "Lilith UIO driver"
-	depends on ARCH_AT91SAM9260
-	help
-	  Lilith driver for AT91 devices
-
-	  To compile this driver as a module, choose M here: the module
-	  will be called uio_lilith.
-
 
 config UIO_PRUSS
 	tristate "Texas Instruments PRUSS driver"

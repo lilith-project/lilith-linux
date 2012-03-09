@@ -76,8 +76,6 @@ static void __init ek_init_early(void)
  */
 static struct at91_usbh_data __initdata ek_usbh_data = {
 	.ports		= 2,
-	.vbus_pin	= {-EINVAL, -EINVAL},
-	.overcurrent_pin= {-EINVAL, -EINVAL},
 };
 
 /*
@@ -85,14 +83,14 @@ static struct at91_usbh_data __initdata ek_usbh_data = {
  */
 static struct at91_udc_data __initdata ek_udc_data = {
 	.vbus_pin	= AT91_PIN_PC5,
-	.pullup_pin	= -EINVAL,		/* pull-up driven by UDC */
+	.pullup_pin	= 0,		/* pull-up driven by UDC */
 };
 
 
 /*
  * MACB Ethernet device
  */
-static struct macb_platform_data __initdata ek_macb_data = {
+static struct at91_eth_data __initdata ek_macb_data = {
 	.phy_irq_pin	= AT91_PIN_PA7,
 	.is_rmii	= 0,
 };
@@ -106,7 +104,7 @@ static struct at91_mmc_data __initdata ek_mmc_data = {
 	.wire4		= 1,
 	.det_pin	= AT91_PIN_PC8,
 	.wp_pin		= AT91_PIN_PC4,
-	.vcc_pin	= -EINVAL,
+//	.vcc_pin	= ... not connected
 };
 
 /*
@@ -135,8 +133,8 @@ static struct resource at91_regs_resource[] = {
 
         [2] = {
                 .name   = "GPIO regs",
-                .start  = AT91SAM9260_BASE_PIOA,
-                .end    = AT91SAM9260_BASE_PIOA + 0x600,
+                .start  = AT91_PIOA + AT91_BASE_SYS,
+                .end    = AT91_PIOA + AT91_BASE_SYS + 0x600,
                 .flags  = IORESOURCE_MEM,
         },
 
@@ -177,13 +175,16 @@ static void __init ek_board_init(void)
 	/* Serial */
 	at91_add_device_serial();
 	/* MMC */
-	at91_add_device_mmc(0, &ek_mmc_data);
+	at91_add_device_mmc(0, &ek_mmc_data);	
 	/* USB Host */
 	at91_add_device_usbh(&ek_usbh_data);
 	/* USB Device */
 	at91_add_device_udc(&ek_udc_data);
 	/* Ethernet */
 	at91_add_device_eth(&ek_macb_data);
+	/* I2C */
+	at91_add_device_i2c(NULL, 0);
+
 
 	/* UIO */
 	platform_device_register(&at91_uio_regs);
